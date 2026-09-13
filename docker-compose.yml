@@ -1,0 +1,16 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: academia-do-ze-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "abcBolinhas12345"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - academia_sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+
+volumes:
+  academia_sqlserver_data:
