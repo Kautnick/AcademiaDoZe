@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroPage"
+             Title="Logradouro">
+
+  <VerticalStackLayout Padding="12" Spacing="8">
+    <Entry Placeholder="CEP" Text="{Binding Cep}" />
+    <Entry Placeholder="Nome" Text="{Binding Nome}" />
+    <Entry Placeholder="Bairro" Text="{Binding Bairro}" />
+    <Entry Placeholder="Cidade" Text="{Binding Cidade}" />
+    <Entry Placeholder="Estado" Text="{Binding Estado}" />
+    <Entry Placeholder="Pais" Text="{Binding Pais}" />
+    <HorizontalStackLayout Spacing="12">
+      <Button Text="Salvar" Command="{Binding SaveCommand}" />
+      <Button Text="Excluir" Command="{Binding DeleteCommand}" />
+    </HorizontalStackLayout>
+  </VerticalStackLayout>
+
+</ContentPage>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AcademiaDoZe.Presentation.AppMaui": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

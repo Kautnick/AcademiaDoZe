@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroListPage"
+             Title="Logradouros">
+
+  <VerticalStackLayout Padding="12">
+    <SearchBar Placeholder="Buscar por CEP ou nome" Text="{Binding Query}" SearchCommand="{Binding SearchCommand}" />
+    <CollectionView ItemsSource="{Binding Items}" SelectionMode="Single" SelectionChanged="OnSelectionChanged">
+      <CollectionView.ItemTemplate>
+        <DataTemplate>
+          <Frame Margin="6" Padding="8">
+            <VerticalStackLayout>
+              <Label Text="{Binding Nome}" FontAttributes="Bold" />
+              <Label Text="{Binding Cep}" FontSize="12" />
+            </VerticalStackLayout>
+          </Frame>
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+    <HorizontalStackLayout Spacing="12">
+      <Button Text="Adicionar" Command="{Binding AddCommand}" />
+      <Button Text="Atualizar" Command="{Binding RefreshCommand}" />
+    </HorizontalStackLayout>
+  </VerticalStackLayout>
+
+</ContentPage>

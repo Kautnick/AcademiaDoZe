@@ -1,4 +1,5 @@
 using AcademiaDoZe.Domain.Enums;
+using AcademiaDoZe.Application.Enums;
 
 namespace AcademiaDoZe.Application.DTOs;
 

@@ -17,7 +17,7 @@ public static class ColaboradorMappingExtensions
             entity.DataNascimento,
             entity.Telefone.Valor,
             entity.Email.Valor,
-            entity.Endereco.Logradouro.ToDto(),
+            new LogradouroDto(entity.Endereco.LogradouroId, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty),
             entity.Endereco.Numero,
             entity.Endereco.Complemento,
             entity.Foto != null ? new ArquivoDto(entity.Foto.Conteudo) : null,
@@ -33,14 +33,12 @@ public static class ColaboradorMappingExtensions
         var logradouroResult = dto.Endereco.ToEntity();
         if (logradouroResult.IsFailure) return Result<Colaborador>.Failure(logradouroResult.Notifications);
 
-        Arquivo? arquivo = null;
-        if (dto.Foto != null)
-        {
-            var arquivoResult = Arquivo.Criar(dto.Foto.Conteudo);
-            if (arquivoResult.IsFailure) return Result<Colaborador>.Failure(arquivoResult.Notifications);
-            arquivo = arquivoResult.Value!;
-        }
+        if (dto.Foto == null)
+            return Result<Colaborador>.Failure("Foto", "ARQUIVO_OBRIGATORIO");
 
-        return Colaborador.Criar(dto.Id, dto.Nome, dto.Cpf, dto.DataNascimento, dto.Telefone, dto.Email, logradouroResult.Value!, dto.Numero, dto.Complemento ?? string.Empty, senha, arquivo, dto.DataAdmissao, dto.Tipo, dto.Vinculo);
+        var arquivoResult = Arquivo.Criar(dto.Foto.Conteudo);
+        if (arquivoResult.IsFailure) return Result<Colaborador>.Failure(arquivoResult.Notifications);
+
+        return Colaborador.Criar(dto.Id, dto.Nome, dto.Cpf, dto.DataNascimento, dto.Telefone, dto.Email, logradouroResult.Value!, dto.Numero, dto.Complemento ?? string.Empty, senha, arquivoResult.Value!, dto.DataAdmissao, dto.Tipo, dto.Vinculo);
     }
 }

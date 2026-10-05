@@ -17,7 +17,7 @@ public static class AlunoMappingExtensions
             entity.DataNascimento,
             entity.Telefone.Valor,
             entity.Email.Valor,
-            entity.Endereco.Logradouro.ToDto(),
+            new LogradouroDto(entity.Endereco.LogradouroId, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty),
             entity.Endereco.Numero,
             entity.Endereco.Complemento,
             entity.Foto != null ? new ArquivoDto(entity.Foto.Conteudo) : null
@@ -30,14 +30,12 @@ public static class AlunoMappingExtensions
         var logradouroResult = dto.Endereco.ToEntity();
         if (logradouroResult.IsFailure) return Result<Aluno>.Failure(logradouroResult.Notifications);
 
-        Arquivo? arquivo = null;
-        if (dto.Foto != null)
-        {
-            var arquivoResult = Arquivo.Criar(dto.Foto.Conteudo);
-            if (arquivoResult.IsFailure) return Result<Aluno>.Failure(arquivoResult.Notifications);
-            arquivo = arquivoResult.Value!;
-        }
+        if (dto.Foto == null)
+            return Result<Aluno>.Failure("Foto", "ARQUIVO_OBRIGATORIO");
 
-        return Aluno.Criar(dto.Id, dto.Nome, dto.Cpf, dto.DataNascimento, dto.Telefone, dto.Email, logradouroResult.Value!, dto.Numero, dto.Complemento ?? string.Empty, senha, arquivo);
+        var arquivoResult = Arquivo.Criar(dto.Foto.Conteudo);
+        if (arquivoResult.IsFailure) return Result<Aluno>.Failure(arquivoResult.Notifications);
+
+        return Aluno.Criar(dto.Id, dto.Nome, dto.Cpf, dto.DataNascimento, dto.Telefone, dto.Email, logradouroResult.Value!, dto.Numero, dto.Complemento ?? string.Empty, senha, arquivoResult.Value!);
     }
 }

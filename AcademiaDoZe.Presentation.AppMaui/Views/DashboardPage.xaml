@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.DashboardPage"
+             Title="Dashboard">
+
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="20">
+      <Frame CornerRadius="12" BackgroundColor="#f0f4f8" Padding="16">
+        <VerticalStackLayout>
+          <Label Text="Academia do Zé" FontAttributes="Bold" FontSize="24" />
+          <Label Text="Matheus Kautnick Domeneghini" FontSize="14" />
+        </VerticalStackLayout>
+      </Frame>
+
+      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+        <Frame Grid.Column="0" CornerRadius="8" Padding="12" BackgroundColor="#fff">
+          <VerticalStackLayout>
+            <Label Text="Logradouros" FontAttributes="Bold" />
+            <Label Text="{Binding LogradourosCount}" FontSize="28" />
+          </VerticalStackLayout>
+        </Frame>
+        <Frame Grid.Column="1" CornerRadius="8" Padding="12" BackgroundColor="#fff">
+          <VerticalStackLayout>
+            <Label Text="Alunos" FontAttributes="Bold" />
+            <Label Text="{Binding AlunosCount}" FontSize="28" />
+          </VerticalStackLayout>
+        </Frame>
+        <Frame Grid.Row="1" Grid.Column="0" CornerRadius="8" Padding="12" BackgroundColor="#fff">
+          <VerticalStackLayout>
+            <Label Text="Colaboradores" FontAttributes="Bold" />
+            <Label Text="{Binding ColaboradoresCount}" FontSize="28" />
+          </VerticalStackLayout>
+        </Frame>
+        <Frame Grid.Row="1" Grid.Column="1" CornerRadius="8" Padding="12" BackgroundColor="#fff">
+          <VerticalStackLayout>
+            <Label Text="Matrículas" FontAttributes="Bold" />
+            <Label Text="{Binding MatriculasCount}" FontSize="28" />
+          </VerticalStackLayout>
+        </Frame>
+      </Grid>
+
+      <Button Text="Ver Logradouros" Command="{Binding NavigateToLogradourosCommand}" />
+    </VerticalStackLayout>
+  </ScrollView>
+
+</ContentPage>

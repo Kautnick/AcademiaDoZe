@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+	<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+	<!-- Manter TFM Windows incluindo vers?o de plataforma para controlar a vers?o inferida pelo SDK -->
+	<OutputType>Exe</OutputType>
+	<UseMaui>true</UseMaui>
+	<SingleProject>true</SingleProject>
+	<WindowsPackageType>None</WindowsPackageType>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+	<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\AcademiaDoZe.Application\AcademiaDoZe.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<MauiImage Include="Resources\Images\logo.svg" />
+  </ItemGroup>
+
+</Project>

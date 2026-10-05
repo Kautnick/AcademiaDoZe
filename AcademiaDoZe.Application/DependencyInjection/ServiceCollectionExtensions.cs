@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<AcademiaDoZe.Application.Interfaces.IPasswordHasher, AcademiaDoZe.Application.Security.PasswordHasher>();
         services.AddScoped<ILogradouroService, LogradouroService>();
         services.AddScoped<IAlunoService, AlunoService>();
         services.AddScoped<IColaboradorService, ColaboradorService>();
