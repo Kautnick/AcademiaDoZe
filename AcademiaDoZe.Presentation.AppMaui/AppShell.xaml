@@ -5,8 +5,8 @@
        x:Class="AcademiaDoZe.Presentation.AppMaui.AppShell">
 
   <TabBar>
-    <ShellContent Title="Dashboard" ContentTemplate="{DataTemplate views:DashboardPage}" />
-    <ShellContent Title="Logradouros" ContentTemplate="{DataTemplate views:LogradouroListPage}" />
+    <ShellContent Route="Dashboard" Title="Dashboard" ContentTemplate="{DataTemplate views:DashboardPage}" />
+    <ShellContent Route="Logradouros" Title="Logradouros" ContentTemplate="{DataTemplate views:LogradouroListPage}" />
   </TabBar>
 
 </Shell>

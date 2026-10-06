@@ -4,9 +4,11 @@ namespace AcademiaDoZe.Presentation.AppMaui;
 
 public partial class AppShell : Shell
 {
+    public const string LogradouroFormRoute = "logradouro-form";
+
     public AppShell()
     {
         InitializeComponent();
-        Routing.RegisterRoute(nameof(Views.LogradouroPage), typeof(Views.LogradouroPage));
+        Routing.RegisterRoute(LogradouroFormRoute, typeof(Views.LogradouroPage));
     }
 }

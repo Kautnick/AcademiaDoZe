@@ -8,6 +8,9 @@ public class ValueObjectsTests
     [Theory(DisplayName = "Cep: dígitos inválidos -> CEP_DIGITOS")]
     [InlineData("123")]
     [InlineData("12-345")]
+    [InlineData("12345-67x")]
+    [InlineData("CEP 12345678")]
+    [InlineData("12-345678")]
     public void Deve_Falhar_Criacao_Quando_CepDigitosInvalidos(string input)
     {
         var result = Cep.Criar(input);

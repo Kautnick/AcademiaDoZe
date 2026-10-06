@@ -21,8 +21,9 @@ public static class MauiProgram
             .ConfigureFonts(fonts => { })
             ;
 
-        var connectionString = Environment.GetEnvironmentVariable("ACADEMIA_DO_ZE_CONNECTION")
-            ?? "Server=localhost,1433;Initial Catalog=db_academia_do_ze;User Id=sa;Password=abcBolinhas12345;TrustServerCertificate=True;Encrypt=False;";
+        var connectionString = Environment.GetEnvironmentVariable("ACADEMIA_DO_ZE_CONNECTION");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            connectionString = @"Server=DESKTOP-U63LS9P\SQLEXPRESS;Initial Catalog=db_academia_do_ze;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;";
 
         builder.Services.AddScoped<ILogradouroRepository>(
             _ => new LogradouroRepository(connectionString, DatabaseType.SqlServer));

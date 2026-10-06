@@ -2,6 +2,7 @@ using AcademiaDoZe.Infrastructure.Exceptions;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Reflection;
+using Microsoft.Data.SqlClient;
 namespace AcademiaDoZe.Infrastructure.Data;
 
 public static class DbInitializer
@@ -20,7 +21,7 @@ public static class DbInitializer
                 var masterConnectionString = System.Text.RegularExpressions.Regex.Replace(connectionString, @"(?i)(Initial Catalog|Database)=db_academia_do_ze", "$1=master");
                 await using (var masterConnection = DbProvider.CreateConnection(masterConnectionString, databaseType))
                 {
-                    await masterConnection.OpenAsync(cancellationToken);
+                    await AbrirComRetryAsync(masterConnection, cancellationToken);
                     var databaseExistsQuery = "SELECT CASE WHEN DB_ID('db_academia_do_ze') IS NOT NULL THEN 1 ELSE 0 END;";
                     await using var databaseExistsCommand = DbProvider.CreateCommand(databaseExistsQuery, masterConnection);
                     var databaseExists = Convert.ToInt32(await databaseExistsCommand.ExecuteScalarAsync(cancellationToken)) == 1;
@@ -35,16 +36,37 @@ public static class DbInitializer
 
             var scriptSql = ObterScript(databaseType);
             await using var connection = DbProvider.CreateConnection(connectionString, databaseType);
-            await connection.OpenAsync(cancellationToken);
+            await AbrirComRetryAsync(connection, cancellationToken);
             await using var command = DbProvider.CreateCommand(scriptSql, connection);
             await command.ExecuteNonQueryAsync(cancellationToken);
             _bancosInicializados.TryAdd(key, true);
         }
         catch (DbException ex)
         {
-            throw new InfrastructureException("ERRO_INICIALIZAR_BANCO", $"Erro ao inicializar banco de dados: {ex.Message}", ex);
+            var orientacao = ex is SqlException sqlException && sqlException.IsTransient
+                ? " Confirme se o serviço SQL Server (SQLEXPRESS) está em execução e se o nome da instância está correto."
+                : string.Empty;
+            throw new InfrastructureException("ERRO_INICIALIZAR_BANCO", $"Erro ao inicializar banco de dados: {ex.Message}{orientacao}", ex);
         }
     }
+
+    private static async Task AbrirComRetryAsync(DbConnection connection, CancellationToken cancellationToken)
+    {
+        const int tentativasMaximas = 3;
+        for (var tentativa = 1; ; tentativa++)
+        {
+            try
+            {
+                await connection.OpenAsync(cancellationToken);
+                return;
+            }
+            catch (SqlException ex) when (ex.IsTransient && tentativa < tentativasMaximas)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(tentativa), cancellationToken);
+            }
+        }
+    }
+
     public static string ObterScript(DatabaseType databaseType)
     {
         var nomeScript = DbProvider.GetScriptName(databaseType);
