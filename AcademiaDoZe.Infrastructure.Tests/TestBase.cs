@@ -15,7 +15,7 @@ public abstract class TestBase
     {
         DatabaseType = SelectedDatabaseType;
         ConnectionString = Environment.GetEnvironmentVariable("ACADEMIA_DO_ZE_CONNECTION")
-            ?? "Server=localhost,1433;Initial Catalog=db_academia_do_ze;User Id=sa;Password=abcBolinhas12345;TrustServerCertificate=True;Encrypt=False;";
+            ?? @"Server=DESKTOP-U63LS9P\SQLEXPRESS;Initial Catalog=db_academia_do_ze;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;Connect Timeout=5;";
     }
 
     protected static string GerarCep() => (80000000 + Random.Shared.Next(0, 9999999)).ToString("D8");

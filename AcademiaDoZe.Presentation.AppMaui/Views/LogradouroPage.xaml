@@ -4,17 +4,63 @@
              x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroPage"
              Title="Logradouro">
 
-  <VerticalStackLayout Padding="12" Spacing="8">
-    <Entry Placeholder="CEP (8 dígitos)" Keyboard="Numeric" MaxLength="9" Text="{Binding Cep}" />
-    <Entry Placeholder="Nome" Text="{Binding Nome}" />
-    <Entry Placeholder="Bairro" Text="{Binding Bairro}" />
-    <Entry Placeholder="Cidade" Text="{Binding Cidade}" />
-    <Entry Placeholder="Estado" Text="{Binding Estado}" />
-    <Entry Placeholder="Pais" Text="{Binding Pais}" />
-    <HorizontalStackLayout Spacing="12">
-      <Button Text="Salvar" Command="{Binding SaveCommand}" />
-      <Button Text="Excluir" Command="{Binding DeleteCommand}" IsEnabled="{Binding PodeExcluir}" />
-    </HorizontalStackLayout>
-  </VerticalStackLayout>
+  <ScrollView>
+    <VerticalStackLayout Padding="24" Spacing="18" MaximumWidthRequest="720" HorizontalOptions="Center">
+      <Border Padding="22"
+              BackgroundColor="{DynamicResource CardBackground}"
+              Stroke="{DynamicResource CardStroke}"
+              StrokeShape="RoundRectangle 20">
+        <VerticalStackLayout Spacing="16">
+          <Label Text="Dados do logradouro" FontSize="22" FontAttributes="Bold" />
+          <Label Text="Preencha os campos para cadastrar ou atualizar o endereço."
+                 TextColor="{DynamicResource TextSecondary}" />
+
+          <VerticalStackLayout Spacing="6">
+            <Label Text="CEP" FontAttributes="Bold" />
+            <Entry Placeholder="12345-678" Keyboard="Numeric" MaxLength="9" Text="{Binding Cep}" />
+          </VerticalStackLayout>
+          <VerticalStackLayout Spacing="6">
+            <Label Text="Logradouro" FontAttributes="Bold" />
+            <Entry Placeholder="Rua ou avenida" Text="{Binding Nome}" />
+          </VerticalStackLayout>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+            <VerticalStackLayout Spacing="6">
+              <Label Text="Bairro" FontAttributes="Bold" />
+              <Entry Placeholder="Bairro" Text="{Binding Bairro}" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1" Spacing="6">
+              <Label Text="Cidade" FontAttributes="Bold" />
+              <Entry Placeholder="Cidade" Text="{Binding Cidade}" />
+            </VerticalStackLayout>
+          </Grid>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+            <VerticalStackLayout Spacing="6">
+              <Label Text="UF" FontAttributes="Bold" />
+              <Entry Placeholder="UF" MaxLength="2" Text="{Binding Estado}" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1" Spacing="6">
+              <Label Text="País" FontAttributes="Bold" />
+              <Entry Placeholder="Brasil" Text="{Binding Pais}" />
+            </VerticalStackLayout>
+          </Grid>
+
+          <Border IsVisible="{Binding TemErro}"
+                  BackgroundColor="{DynamicResource ErrorBackground}"
+                  Stroke="{DynamicResource ErrorBorder}"
+                  StrokeShape="RoundRectangle 12"
+                  Padding="14">
+            <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+          </Border>
+          <ActivityIndicator IsRunning="{Binding IsBusy}"
+                             IsVisible="{Binding IsBusy}"
+                             Color="{DynamicResource Accent}" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Text="Salvar" Command="{Binding SaveCommand}" IsEnabled="{Binding PodeSalvar}" />
+            <Button Grid.Column="1" Text="Excluir" Command="{Binding DeleteCommand}" IsEnabled="{Binding PodeExcluir}" Style="{StaticResource DangerButtonStyle}" />
+          </Grid>
+        </VerticalStackLayout>
+      </Border>
+    </VerticalStackLayout>
+  </ScrollView>
 
 </ContentPage>

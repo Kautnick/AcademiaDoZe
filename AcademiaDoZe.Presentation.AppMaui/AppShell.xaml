@@ -2,7 +2,13 @@
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:views="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Views"
-       x:Class="AcademiaDoZe.Presentation.AppMaui.AppShell">
+       x:Class="AcademiaDoZe.Presentation.AppMaui.AppShell"
+       BackgroundColor="{DynamicResource PageBackground}"
+       ForegroundColor="{DynamicResource ShellForeground}"
+       TitleColor="{DynamicResource ShellForeground}"
+       Shell.TabBarBackgroundColor="{DynamicResource CardBackground}"
+       Shell.TabBarForegroundColor="{DynamicResource Accent}"
+       Shell.TabBarUnselectedColor="{DynamicResource ShellUnselected}">
 
   <TabBar>
     <ShellContent Route="Dashboard" Title="Dashboard" ContentTemplate="{DataTemplate views:DashboardPage}" />

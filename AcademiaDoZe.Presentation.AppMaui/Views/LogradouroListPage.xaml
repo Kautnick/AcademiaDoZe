@@ -4,24 +4,75 @@
              x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroListPage"
              Title="Logradouros">
 
-  <VerticalStackLayout Padding="12">
-    <SearchBar Placeholder="Buscar por CEP ou nome" Text="{Binding Query}" SearchCommand="{Binding SearchCommand}" />
-    <CollectionView ItemsSource="{Binding Items}" SelectionMode="Single" SelectionChanged="OnSelectionChanged">
-      <CollectionView.ItemTemplate>
-        <DataTemplate>
-          <Frame Margin="6" Padding="8">
-            <VerticalStackLayout>
-              <Label Text="{Binding Nome}" FontAttributes="Bold" />
-              <Label Text="{Binding Cep}" FontSize="12" />
-            </VerticalStackLayout>
-          </Frame>
-        </DataTemplate>
-      </CollectionView.ItemTemplate>
-    </CollectionView>
-    <HorizontalStackLayout Spacing="12">
+  <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+    <SearchBar Grid.Row="0"
+               Placeholder="Buscar por CEP, nome ou cidade"
+               Text="{Binding Query}"
+               SearchCommand="{Binding SearchCommand}" />
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+      <ActivityIndicator IsRunning="{Binding IsBusy}"
+                         IsVisible="{Binding IsBusy}"
+                         Color="{DynamicResource Accent}" />
+      <Label Grid.Column="1" Text="Carregando logradouros..."
+             IsVisible="{Binding IsBusy}"
+              TextColor="{DynamicResource TextSecondary}"
+             VerticalTextAlignment="Center" />
+    </Grid>
+    <Border Grid.Row="2"
+            IsVisible="{Binding TemErro}"
+            BackgroundColor="{DynamicResource ErrorBackground}"
+            Stroke="{DynamicResource ErrorBorder}"
+            StrokeShape="RoundRectangle 12"
+            Padding="14">
+      <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+    </Border>
+    <Grid Grid.Row="3">
+      <CollectionView ItemsSource="{Binding Items}"
+                      SelectionMode="Single"
+                      SelectionChanged="OnSelectionChanged">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Border Margin="0,0,0,10"
+                    Padding="16"
+                    BackgroundColor="{DynamicResource CardBackground}"
+                    Stroke="{DynamicResource CardStroke}"
+                    StrokeShape="RoundRectangle 16">
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="5">
+                <Label Text="{Binding Nome}" FontAttributes="Bold" FontSize="17" />
+                <Label Grid.Row="1" TextColor="{DynamicResource TextSecondary}">
+                  <Label.FormattedText>
+                    <FormattedString>
+                      <Span Text="{Binding Bairro}" />
+                      <Span Text=", " />
+                      <Span Text="{Binding Cidade}" />
+                    </FormattedString>
+                  </Label.FormattedText>
+                </Label>
+                <Label Grid.Row="2" FontSize="13" TextColor="{DynamicResource Accent}">
+                  <Label.FormattedText>
+                    <FormattedString>
+                      <Span Text="{Binding Cep}" />
+                      <Span Text=" · " />
+                      <Span Text="{Binding Estado}" />
+                    </FormattedString>
+                  </Label.FormattedText>
+                </Label>
+                <Label Grid.Column="1" Grid.RowSpan="3" Text="›" FontSize="28" TextColor="{DynamicResource Accent}" VerticalTextAlignment="Center" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+      <Label Text="Nenhum logradouro encontrado."
+             IsVisible="{Binding HasNoItems}"
+             HorizontalTextAlignment="Center"
+             VerticalTextAlignment="Center"
+             TextColor="{DynamicResource TextSecondary}" />
+    </Grid>
+    <Grid Grid.Row="4" ColumnDefinitions="*,*" ColumnSpacing="12">
       <Button Text="Adicionar" Command="{Binding AddCommand}" />
-      <Button Text="Atualizar" Command="{Binding RefreshCommand}" />
-    </HorizontalStackLayout>
-  </VerticalStackLayout>
+      <Button Grid.Column="1" Text="Atualizar" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+    </Grid>
+  </Grid>
 
 </ContentPage>

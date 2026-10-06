@@ -2,45 +2,80 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AcademiaDoZe.Presentation.AppMaui.Views.DashboardPage"
-             Title="Dashboard">
+             Title="Início">
 
   <ScrollView>
-    <VerticalStackLayout Padding="20" Spacing="20">
-      <Frame CornerRadius="12" BackgroundColor="#f0f4f8" Padding="16">
-        <VerticalStackLayout>
-          <Label Text="Academia do Zé" FontAttributes="Bold" FontSize="24" />
-          <Label Text="Matheus Kautnick Domeneghini" FontSize="14" />
-        </VerticalStackLayout>
-      </Frame>
+    <VerticalStackLayout Padding="24" Spacing="22">
+      <Border BackgroundColor="{DynamicResource CardBackground}"
+              Stroke="{DynamicResource CardStroke}"
+              StrokeThickness="1"
+              StrokeShape="RoundRectangle 20"
+              Padding="20">
+        <Image Source="logo.png"
+               Aspect="AspectFit"
+               HeightRequest="116"
+               HorizontalOptions="Start"
+               SemanticProperties.Description="Academia do Zé — Matheus Kautnick Domeneghini" />
+      </Border>
 
-      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-        <Frame Grid.Column="0" CornerRadius="8" Padding="12" BackgroundColor="#fff">
-          <VerticalStackLayout>
-            <Label Text="Logradouros" FontAttributes="Bold" />
-            <Label Text="{Binding LogradourosCount}" FontSize="28" />
+      <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="14">
+        <Border Grid.Column="0" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 18" Padding="18">
+          <VerticalStackLayout Spacing="8">
+            <Label Text="LOGRADOUROS" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource TextSecondary}" />
+            <Label Text="{Binding LogradourosCount}" FontSize="34" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
           </VerticalStackLayout>
-        </Frame>
-        <Frame Grid.Column="1" CornerRadius="8" Padding="12" BackgroundColor="#fff">
-          <VerticalStackLayout>
-            <Label Text="Alunos" FontAttributes="Bold" />
-            <Label Text="{Binding AlunosCount}" FontSize="28" />
+        </Border>
+        <Border Grid.Column="1" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 18" Padding="18">
+          <VerticalStackLayout Spacing="8">
+            <Label Text="ALUNOS" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource TextSecondary}" />
+            <Label Text="{Binding AlunosCount}" FontSize="34" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
           </VerticalStackLayout>
-        </Frame>
-        <Frame Grid.Row="1" Grid.Column="0" CornerRadius="8" Padding="12" BackgroundColor="#fff">
-          <VerticalStackLayout>
-            <Label Text="Colaboradores" FontAttributes="Bold" />
-            <Label Text="{Binding ColaboradoresCount}" FontSize="28" />
+        </Border>
+        <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 18" Padding="18">
+          <VerticalStackLayout Spacing="8">
+            <Label Text="COLABORADORES" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource TextSecondary}" />
+            <Label Text="{Binding ColaboradoresCount}" FontSize="34" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
           </VerticalStackLayout>
-        </Frame>
-        <Frame Grid.Row="1" Grid.Column="1" CornerRadius="8" Padding="12" BackgroundColor="#fff">
-          <VerticalStackLayout>
-            <Label Text="Matrículas" FontAttributes="Bold" />
-            <Label Text="{Binding MatriculasCount}" FontSize="28" />
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 18" Padding="18">
+          <VerticalStackLayout Spacing="8">
+            <Label Text="MATRÍCULAS" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource TextSecondary}" />
+            <Label Text="{Binding MatriculasCount}" FontSize="34" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
           </VerticalStackLayout>
-        </Frame>
+        </Border>
       </Grid>
 
-      <Button Text="Ver Logradouros" Command="{Binding NavigateToLogradourosCommand}" />
+      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
+        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           Color="{DynamicResource Accent}" />
+        <Label Grid.Column="1" Text="Atualizando indicadores..."
+               IsVisible="{Binding IsBusy}"
+               TextColor="{DynamicResource TextSecondary}"
+               VerticalTextAlignment="Center" />
+      </Grid>
+      <Border IsVisible="{Binding HasLoadError}"
+              BackgroundColor="{DynamicResource ErrorBackground}"
+              Stroke="{DynamicResource ErrorBorder}"
+              StrokeThickness="1"
+              StrokeShape="RoundRectangle 12"
+              Padding="14">
+        <Label Text="{Binding LoadErrorMessage}" TextColor="{DynamicResource ErrorForeground}" FontSize="13" />
+      </Border>
+
+      <Button x:Name="ThemeButton"
+              Text="◐"
+              SemanticProperties.Description="Alternar aparência"
+              Style="{StaticResource SecondaryButtonStyle}"
+              Clicked="OnCycleThemeClicked"
+              WidthRequest="46"
+              HeightRequest="42"
+              Padding="0"
+              FontSize="20"
+              HorizontalOptions="End" />
+      <Button Text="Abrir logradouros"
+              Command="{Binding NavigateToLogradourosCommand}"
+              HorizontalOptions="Fill" />
     </VerticalStackLayout>
   </ScrollView>
 

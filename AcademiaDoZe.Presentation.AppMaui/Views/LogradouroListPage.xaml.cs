@@ -29,7 +29,7 @@ public partial class LogradouroListPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Academia do Zé", $"Não foi possível abrir o logradouro. {ex.Message}", "OK");
+            await DisplayAlertAsync("Academia do Zé", $"Não foi possível abrir o logradouro. {ex.Message}", "OK");
         }
         finally
         {

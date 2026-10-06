@@ -16,6 +16,18 @@ public class DashboardListViewModel : BaseViewModel
     public int AlunosCount { get; private set; }
     public int ColaboradoresCount { get; private set; }
     public int MatriculasCount { get; private set; }
+    private string _loadErrorMessage = string.Empty;
+    public string LoadErrorMessage
+    {
+        get => _loadErrorMessage;
+        private set
+        {
+            _loadErrorMessage = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasLoadError));
+        }
+    }
+    public bool HasLoadError => !string.IsNullOrWhiteSpace(LoadErrorMessage);
 
     public Command NavigateToLogradourosCommand { get; }
 
@@ -42,7 +54,11 @@ public class DashboardListViewModel : BaseViewModel
 
     public async Task LoadAsync()
     {
+        if (IsBusy)
+            return;
+
         IsBusy = true;
+        LoadErrorMessage = string.Empty;
         try
         {
             var logradouros = await _logradouroService.ObterTodosAsync();
@@ -62,7 +78,7 @@ public class DashboardListViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Não foi possível carregar os dados. Verifique a conexão com o SQL Server. {ex.Message}");
+            LoadErrorMessage = $"Não foi possível atualizar os dados. Confira a conexão com o SQL Server. {ex.Message}";
         }
         finally
         {
@@ -75,7 +91,7 @@ public class DashboardListViewModel : BaseViewModel
         try
         {
             if (Shell.Current is { } shell)
-                await shell.DisplayAlert("Academia do Zé", message, "OK");
+                await shell.DisplayAlertAsync("Academia do Zé", message, "OK");
         }
         catch
         {

@@ -23,7 +23,7 @@ public static class MauiProgram
 
         var connectionString = Environment.GetEnvironmentVariable("ACADEMIA_DO_ZE_CONNECTION");
         if (string.IsNullOrWhiteSpace(connectionString))
-            connectionString = @"Server=DESKTOP-U63LS9P\SQLEXPRESS;Initial Catalog=db_academia_do_ze;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;";
+            connectionString = @"Server=DESKTOP-U63LS9P\SQLEXPRESS;Initial Catalog=db_academia_do_ze;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;Connect Timeout=5;";
 
         builder.Services.AddScoped<ILogradouroRepository>(
             _ => new LogradouroRepository(connectionString, DatabaseType.SqlServer));

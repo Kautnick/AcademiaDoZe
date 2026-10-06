@@ -15,6 +15,7 @@ public class LogradouroViewModel : BaseViewModel
     private string _cidade = string.Empty;
     private string _estado = string.Empty;
     private string _pais = string.Empty;
+    private string _mensagemErro = string.Empty;
 
     public int Id
     {
@@ -22,12 +23,19 @@ public class LogradouroViewModel : BaseViewModel
         private set { _id = value; OnPropertyChanged(); OnPropertyChanged(nameof(PodeExcluir)); }
     }
     public bool PodeExcluir => Id > 0 && !IsBusy;
-    public string Cep { get => _cep; set { _cep = value; OnPropertyChanged(); } }
-    public string Nome { get => _nome; set { _nome = value; OnPropertyChanged(); } }
-    public string Bairro { get => _bairro; set { _bairro = value; OnPropertyChanged(); } }
-    public string Cidade { get => _cidade; set { _cidade = value; OnPropertyChanged(); } }
-    public string Estado { get => _estado; set { _estado = value; OnPropertyChanged(); } }
-    public string Pais { get => _pais; set { _pais = value; OnPropertyChanged(); } }
+    public bool PodeSalvar => !IsBusy;
+    public string MensagemErro
+    {
+        get => _mensagemErro;
+        private set { _mensagemErro = value; OnPropertyChanged(); OnPropertyChanged(nameof(TemErro)); }
+    }
+    public bool TemErro => !string.IsNullOrWhiteSpace(MensagemErro);
+    public string Cep { get => _cep; set { _cep = value; OnPropertyChanged(); LimparErro(); } }
+    public string Nome { get => _nome; set { _nome = value; OnPropertyChanged(); LimparErro(); } }
+    public string Bairro { get => _bairro; set { _bairro = value; OnPropertyChanged(); LimparErro(); } }
+    public string Cidade { get => _cidade; set { _cidade = value; OnPropertyChanged(); LimparErro(); } }
+    public string Estado { get => _estado; set { _estado = value; OnPropertyChanged(); LimparErro(); } }
+    public string Pais { get => _pais; set { _pais = value; OnPropertyChanged(); LimparErro(); } }
 
     public Command SaveCommand { get; }
     public Command DeleteCommand { get; }
@@ -45,7 +53,7 @@ public class LogradouroViewModel : BaseViewModel
             return;
 
         IsBusy = true;
-        OnPropertyChanged(nameof(PodeExcluir));
+        NotificarEstadoDosComandos();
         try
         {
             var logradouro = await _service.ObterPorIdAsync(id);
@@ -62,12 +70,12 @@ public class LogradouroViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Não foi possível carregar o logradouro: {ex.Message}");
+            MensagemErro = $"Não foi possível carregar o logradouro: {ex.Message}";
         }
         finally
         {
             IsBusy = false;
-            OnPropertyChanged(nameof(PodeExcluir));
+            NotificarEstadoDosComandos();
         }
     }
 
@@ -76,8 +84,9 @@ public class LogradouroViewModel : BaseViewModel
         if (IsBusy)
             return;
 
+        MensagemErro = string.Empty;
         IsBusy = true;
-        OnPropertyChanged(nameof(PodeExcluir));
+        NotificarEstadoDosComandos();
         try
         {
             var dto = new LogradouroDto(Id, Cep, Nome, Bairro, Cidade, Estado, Pais);
@@ -90,15 +99,12 @@ public class LogradouroViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            var message = ex.Message.Contains("CEP_DIGITOS", StringComparison.Ordinal)
-                ? "O CEP deve conter exatamente 8 dígitos. Ex.: 12345678 ou 12345-678."
-                : ex.Message;
-            await ShowErrorAsync(message);
+            MensagemErro = TraduzirErro(ex.Message);
         }
         finally
         {
             IsBusy = false;
-            OnPropertyChanged(nameof(PodeExcluir));
+            NotificarEstadoDosComandos();
         }
     }
 
@@ -108,17 +114,18 @@ public class LogradouroViewModel : BaseViewModel
             return;
 
         var shell = Shell.Current;
-        if (shell is null || !await shell.DisplayAlert("Excluir logradouro", "Deseja realmente excluir este logradouro?", "Excluir", "Cancelar"))
+        if (shell is null || !await shell.DisplayAlertAsync("Excluir logradouro", "Deseja realmente excluir este logradouro?", "Excluir", "Cancelar"))
             return;
 
+        MensagemErro = string.Empty;
         IsBusy = true;
-        OnPropertyChanged(nameof(PodeExcluir));
+        NotificarEstadoDosComandos();
         try
         {
             var removido = await _service.RemoverAsync(Id);
             if (!removido)
             {
-                await ShowErrorAsync("O logradouro não foi encontrado ou já foi removido.");
+                MensagemErro = "O logradouro não foi encontrado ou já foi removido.";
                 return;
             }
 
@@ -126,25 +133,43 @@ public class LogradouroViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Não foi possível excluir o logradouro. Ele pode estar sendo usado por alunos ou colaboradores. {ex.Message}");
+            MensagemErro = $"Não foi possível excluir o logradouro. Ele pode estar sendo usado por alunos ou colaboradores. {ex.Message}";
         }
         finally
         {
             IsBusy = false;
-            OnPropertyChanged(nameof(PodeExcluir));
+            NotificarEstadoDosComandos();
         }
     }
 
-    private static async Task ShowErrorAsync(string message)
+    private void LimparErro()
     {
-        try
-        {
-            if (Shell.Current is { } shell)
-                await shell.DisplayAlert("Academia do Zé", message, "OK");
-        }
-        catch
-        {
-            System.Diagnostics.Debug.WriteLine(message);
-        }
+        if (!string.IsNullOrEmpty(MensagemErro))
+            MensagemErro = string.Empty;
+    }
+
+    private void NotificarEstadoDosComandos()
+    {
+        OnPropertyChanged(nameof(PodeExcluir));
+        OnPropertyChanged(nameof(PodeSalvar));
+    }
+
+    private static string TraduzirErro(string mensagem)
+    {
+        var mensagens = mensagem.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(codigo => codigo switch
+            {
+                "CEP_OBRIGATORIO" => "Informe o CEP.",
+                "CEP_DIGITOS" => "O CEP deve conter 8 dígitos. Ex.: 12345-678.",
+                "CEP_JA_EXISTE" => "Já existe um logradouro cadastrado com esse CEP.",
+                "NOME_OBRIGATORIO" => "Informe o nome do logradouro.",
+                "BAIRRO_OBRIGATORIO" => "Informe o bairro.",
+                "CIDADE_OBRIGATORIO" => "Informe a cidade.",
+                "ESTADO_OBRIGATORIO" => "Informe a UF.",
+                "PAIS_OBRIGATORIO" => "Informe o país.",
+                _ => codigo
+            })
+            .Distinct();
+        return string.Join(Environment.NewLine, mensagens);
     }
 }
