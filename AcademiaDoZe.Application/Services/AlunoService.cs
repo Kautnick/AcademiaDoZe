@@ -53,7 +53,10 @@ public class AlunoService : IAlunoService
 
     public async Task<AlunoDto> AtualizarAsync(AlunoDto dto, CancellationToken cancellationToken = default)
     {
-        var entityResult = dto.ToEntity("");
+        var existente = await _repository.ObterPorId(dto.Id, cancellationToken);
+        if (existente is null) throw new DomainException("ALUNO_NAO_ENCONTRADO");
+
+        var entityResult = dto.ToEntity(existente.Senha.Valor);
         if (entityResult.IsFailure) throw new DomainException(string.Join(";", entityResult.Notifications.Select(n => n.Mensagem)));
         var updated = await _repository.Atualizar(entityResult.Value!, cancellationToken);
         return updated.ToDto();

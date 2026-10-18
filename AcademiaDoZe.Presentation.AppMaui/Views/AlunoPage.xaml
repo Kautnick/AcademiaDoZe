@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.AlunoPage"
+             Title="Aluno">
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="12">
+      <Label Text="{Binding Titulo}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+      <Border Padding="12" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="10">
+          <Border WidthRequest="220" HeightRequest="220" Padding="4" HorizontalOptions="Center" BackgroundColor="{DynamicResource CardElevated}" Stroke="{DynamicResource Accent}" StrokeThickness="3" StrokeShape="Ellipse" IsVisible="{Binding TemFoto}">
+            <Image Source="{Binding FotoSource}" Aspect="AspectFill" />
+          </Border>
+          <Label Text="Nenhuma foto selecionada" IsVisible="{Binding NaoTemFoto}" TextColor="{DynamicResource TextSecondary}" HorizontalTextAlignment="Center" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Text="Tirar foto" Command="{Binding CameraCommand}" />
+            <Button Grid.Column="1" Text="Galeria" Command="{Binding GalleryCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+          </Grid>
+        </VerticalStackLayout>
+      </Border>
+      <Label Text="Dados pessoais" FontSize="18" FontAttributes="Bold" />
+      <Entry Placeholder="Nome completo" Text="{Binding Nome}" />
+      <Entry Placeholder="CPF" Text="{Binding Cpf}" Keyboard="Numeric" />
+      <DatePicker Date="{Binding DataNascimento}" MaximumDate="{x:Static sys:DateTime.Today}" />
+      <Entry Placeholder="Telefone" Text="{Binding Telefone}" Keyboard="Telephone" />
+      <Entry Placeholder="E-mail" Text="{Binding Email}" Keyboard="Email" />
+      <Entry Placeholder="Senha (obrigatória no cadastro)" Text="{Binding Senha}" IsPassword="True" IsVisible="{Binding PodeInformarSenha}" />
+      <Label Text="Endereço" FontSize="18" FontAttributes="Bold" />
+      <Picker Title="Selecione um logradouro" ItemsSource="{Binding Enderecos}" ItemDisplayBinding="{Binding Nome}" SelectedItem="{Binding EnderecoSelecionado}" />
+      <Entry Placeholder="Número" Text="{Binding Numero}" Keyboard="Numeric" />
+      <Entry Placeholder="Complemento (opcional)" Text="{Binding Complemento}" />
+      <Border IsVisible="{Binding TemErro}" BackgroundColor="{DynamicResource ErrorBackground}" Stroke="{DynamicResource ErrorBorder}" StrokeShape="RoundRectangle 12" Padding="14">
+        <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+      </Border>
+      <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{DynamicResource Accent}" />
+      <Button Text="Salvar aluno" Command="{Binding SaveCommand}" IsEnabled="{Binding PodeSalvar}" />
+      <Button Text="Excluir aluno" Command="{Binding DeleteCommand}" IsVisible="{Binding HasId}" IsEnabled="{Binding PodeExcluir}" Style="{StaticResource DangerButtonStyle}" />
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>

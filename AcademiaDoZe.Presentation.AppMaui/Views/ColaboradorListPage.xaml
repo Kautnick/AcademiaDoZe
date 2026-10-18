@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.ColaboradorListPage"
+             Title="Colaboradores">
+  <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+    <SearchBar Grid.Row="0" Placeholder="Buscar por CPF" Text="{Binding Query}" SearchCommand="{Binding SearchCommand}" Keyboard="Numeric" />
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+      <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{DynamicResource Accent}" />
+      <Label Grid.Column="1" Text="Carregando colaboradores..." IsVisible="{Binding IsBusy}" TextColor="{DynamicResource TextSecondary}" VerticalTextAlignment="Center" />
+    </Grid>
+    <Border Grid.Row="2" IsVisible="{Binding TemErro}" BackgroundColor="{DynamicResource ErrorBackground}" Stroke="{DynamicResource ErrorBorder}" StrokeShape="RoundRectangle 12" Padding="14">
+      <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+    </Border>
+    <Grid Grid.Row="3">
+      <CollectionView ItemsSource="{Binding Items}" SelectionMode="Single" SelectionChanged="OnSelectionChanged">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Border Margin="0,0,0,10" Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="5">
+                <Label Text="{Binding Nome}" FontAttributes="Bold" FontSize="17" />
+                <Label Grid.Row="1" Text="{Binding Cpf}" TextColor="{DynamicResource Accent}" />
+                <Label Grid.Row="2" Text="{Binding Tipo}" TextColor="{DynamicResource TextSecondary}" />
+                <Label Grid.Column="1" Grid.RowSpan="3" Text="›" FontSize="28" TextColor="{DynamicResource Accent}" VerticalTextAlignment="Center" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+      <Label Text="Nenhum colaborador encontrado." IsVisible="{Binding HasNoItems}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" />
+    </Grid>
+    <Grid Grid.Row="4" ColumnDefinitions="*,*" ColumnSpacing="12">
+      <Button Text="Adicionar colaborador" Command="{Binding AddCommand}" />
+      <Button Grid.Column="1" Text="Atualizar" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+    </Grid>
+  </Grid>
+</ContentPage>
