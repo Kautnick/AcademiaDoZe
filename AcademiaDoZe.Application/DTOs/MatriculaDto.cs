@@ -1,5 +1,4 @@
 using AcademiaDoZe.Domain.Enums;
-using AcademiaDoZe.Application.Enums;
 
 namespace AcademiaDoZe.Application.DTOs;
 
@@ -7,11 +6,11 @@ public record MatriculaDto
 (
     int Id,
     int AlunoId,
-    AppMatriculaPlano Plano,
-    System.DateOnly DataInicio,
-    System.DateOnly DataFim,
+    MatriculaPlano Plano,
+    DateOnly DataInicio,
+    DateOnly DataFim,
     string Objetivo,
-    AppMatriculaRestricoes RestricoesMedicas,
+    MatriculaRestricoes RestricoesMedicas,
     string ObservacoesRestricoes,
-    ArquivoDto? LaudoMedico
+    IReadOnlyList<MatriculaLaudoDto> LaudosMedicos
 );

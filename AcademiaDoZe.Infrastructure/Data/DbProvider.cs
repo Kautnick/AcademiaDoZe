@@ -1,15 +1,13 @@
 using AcademiaDoZe.Infrastructure.Exceptions;
 using Microsoft.Data.SqlClient;
-using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Data.Common;
+
 namespace AcademiaDoZe.Infrastructure.Data;
 
 public enum DatabaseType
 {
-    SqlServer,
-    MySql,
-    Sqlite
+    SqlServer
 }
 public static class DbProvider
 {
@@ -21,12 +19,9 @@ public static class DbProvider
         if (string.IsNullOrWhiteSpace(connectionString)) throw new InfrastructureException("CONEXAO_STRING_VAZIA", "String de conexão não pode ser vazia.");
         try
         {
-            DbConnection connection = dbType switch
-            {
-                DatabaseType.SqlServer => new SqlConnection(connectionString),
-                DatabaseType.Sqlite => new SqliteConnection(connectionString),
-                _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-            };
+            if (dbType != DatabaseType.SqlServer)
+                throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}");
+            DbConnection connection = new SqlConnection(connectionString);
             if (connection == null) throw new InfrastructureException("FALHA_CONEXAO", $"Falha ao instanciar conexão para {dbType}.");
             return connection;
         }
@@ -92,74 +87,51 @@ public static class DbProvider
     #region Funções ajustadas conforme o SGDB selecionado
     public static string GetScriptName(DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => "script_sqlserver.sql",
-            DatabaseType.MySql => "script_mysql.sql",
-            DatabaseType.Sqlite => "script_sqlite.sql",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return "script_sqlserver.sql";
     }
+
     public static string FormatInsertQuery(string insertSql, DatabaseType dbType)
     {
         if (string.IsNullOrWhiteSpace(insertSql)) throw new InfrastructureException("SQL_INSERT_VAZIO", "Comando SQL de INSERT não pode ser vazio.");
-        return dbType switch
-        {
-            DatabaseType.SqlServer => $"{insertSql}; SELECT SCOPE_IDENTITY();",
-            DatabaseType.MySql => $"{insertSql}; SELECT LAST_INSERT_ID();",
-            DatabaseType.Sqlite => $"{insertSql}; SELECT last_insert_rowid();",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return $"{insertSql}; SELECT SCOPE_IDENTITY();";
     }
+
     public static string GetCurrentDateFunction(DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => "GETDATE()",
-            DatabaseType.MySql => "CURRENT_DATE()",
-            DatabaseType.Sqlite => "DATE('now')",
-            _ => "CURRENT_DATE()"
-        };
+        GarantirSqlServer(dbType);
+        return "GETDATE()";
     }
+
     public static string GetDateAddDaysExpression(string dateExpr, string daysParam, DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => $"DATEADD(day, {daysParam}, {dateExpr})",
-            DatabaseType.MySql => $"DATE_ADD({dateExpr}, INTERVAL {daysParam} DAY)",
-            DatabaseType.Sqlite => $"DATE({dateExpr}, '+' || {daysParam} || ' days')",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return $"DATEADD(day, {daysParam}, {dateExpr})";
     }
+
     public static string GetDateHourExpression(string dateColumn, DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => $"DATEPART(HOUR, {dateColumn})",
-            DatabaseType.MySql => $"HOUR({dateColumn})",
-            DatabaseType.Sqlite => $"CAST(strftime('%H', {dateColumn}) AS INTEGER)",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return $"DATEPART(HOUR, {dateColumn})";
     }
+
     public static string GetDateMonthExpression(string dateColumn, DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => $"MONTH({dateColumn})",
-            DatabaseType.MySql => $"MONTH({dateColumn})",
-            DatabaseType.Sqlite => $"CAST(strftime('%m', {dateColumn}) AS INTEGER)",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return $"MONTH({dateColumn})";
     }
+
     public static string GetDateDayExpression(string dateColumn, DatabaseType dbType)
     {
-        return dbType switch
-        {
-            DatabaseType.SqlServer => $"DAY({dateColumn})",
-            DatabaseType.MySql => $"DAY({dateColumn})",
-            DatabaseType.Sqlite => $"CAST(strftime('%d', {dateColumn}) AS INTEGER)",
-            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
-        };
+        GarantirSqlServer(dbType);
+        return $"DAY({dateColumn})";
+    }
+
+    private static void GarantirSqlServer(DatabaseType dbType)
+    {
+        if (dbType != DatabaseType.SqlServer)
+            throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}");
     }
     #endregion
 }

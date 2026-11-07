@@ -68,9 +68,37 @@ BEGIN
         laudo_medico VARBINARY(MAX) NULL,
         CONSTRAINT FK_tb_matricula_tb_aluno FOREIGN KEY(aluno_id) REFERENCES dbo.tb_aluno(id_aluno) ON DELETE CASCADE
     );
-    CREATE INDEX IX_tb_matricula_aluno_id ON dbo.tb_matricula(aluno_id);
-    CREATE INDEX IX_tb_matricula_data_fim ON dbo.tb_matricula(data_fim);
 END
+
+IF COL_LENGTH(N'dbo.tb_matricula', N'restricao_medica') IS NULL
+    ALTER TABLE dbo.tb_matricula ADD restricao_medica INT NOT NULL CONSTRAINT DF_tb_matricula_restricao DEFAULT (0);
+IF COL_LENGTH(N'dbo.tb_matricula', N'obs_restricao') IS NULL
+    ALTER TABLE dbo.tb_matricula ADD obs_restricao VARCHAR(500) NULL;
+IF COL_LENGTH(N'dbo.tb_matricula', N'laudo_medico') IS NULL
+    ALTER TABLE dbo.tb_matricula ADD laudo_medico VARBINARY(MAX) NULL;
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.tb_matricula') AND name = N'IX_tb_matricula_aluno_id')
+    CREATE INDEX IX_tb_matricula_aluno_id ON dbo.tb_matricula(aluno_id);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.tb_matricula') AND name = N'IX_tb_matricula_data_fim')
+    CREATE INDEX IX_tb_matricula_data_fim ON dbo.tb_matricula(data_fim);
+
+IF OBJECT_ID(N'dbo.tb_matricula_laudo', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.tb_matricula_laudo (
+        id_laudo INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_tb_matricula_laudo PRIMARY KEY,
+        matricula_id INT NOT NULL,
+        nome_arquivo NVARCHAR(255) NOT NULL,
+        conteudo VARBINARY(MAX) NOT NULL,
+        CONSTRAINT FK_tb_matricula_laudo_tb_matricula FOREIGN KEY(matricula_id) REFERENCES dbo.tb_matricula(id_matricula) ON DELETE CASCADE
+    );
+    CREATE INDEX IX_tb_matricula_laudo_matricula_id ON dbo.tb_matricula_laudo(matricula_id);
+END
+
+INSERT INTO dbo.tb_matricula_laudo (matricula_id, nome_arquivo, conteudo)
+SELECT m.id_matricula, N'laudo-medico', m.laudo_medico
+FROM dbo.tb_matricula m
+WHERE m.laudo_medico IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.tb_matricula_laudo ml WHERE ml.matricula_id = m.id_matricula);
 
 IF OBJECT_ID(N'dbo.tb_acesso', N'U') IS NULL
 BEGIN

@@ -73,6 +73,43 @@ public class MatriculaInfrastructureTests : TestBase
     }
 
     [Fact]
+    public async Task Matricula_MultiplosLaudos_PersisteENaoPerdeArquivos()
+    {
+        var aluno = await AlunoInfrastructureTests.CriarEInserirAlunoAsync(_alunoRepo, _logradouroRepo);
+        var laudos = new[]
+        {
+            LaudoMatricula.Criar("parecer-clinico.pdf", new byte[] { 11, 12, 13 }).Value!,
+            LaudoMatricula.Criar("exame-medico.png", new byte[] { 21, 22, 23, 24 }).Value!
+        };
+        var criada = Matricula.CriarComLaudos(
+            0, aluno, MatriculaPlano.Mensal, DateOnly.FromDateTime(DateTime.Today),
+            NomeAluno, MatriculaRestricoes.None, laudos, "Laudos para teste").Value!;
+
+        var inserida = await _matriculaRepo.Adicionar(criada);
+        var obtida = await _matriculaRepo.ObterPorId(inserida.Id);
+
+        Assert.NotNull(obtida);
+        Assert.Collection(obtida.LaudosMedicos,
+            laudo => { Assert.Equal("parecer-clinico.pdf", laudo.NomeArquivo); Assert.Equal(new byte[] { 11, 12, 13 }, laudo.Conteudo.Conteudo); },
+            laudo => { Assert.Equal("exame-medico.png", laudo.NomeArquivo); Assert.Equal(new byte[] { 21, 22, 23, 24 }, laudo.Conteudo.Conteudo); });
+
+        var novosLaudos = new[]
+        {
+            LaudoMatricula.Criar("parecer-atualizado.pdf", new byte[] { 31, 32, 33 }).Value!
+        };
+        var entidadeEditada = Matricula.CriarComLaudos(
+            inserida.Id, aluno, MatriculaPlano.Mensal, inserida.DataInicio,
+            NomeAluno, MatriculaRestricoes.None, novosLaudos, "Laudo atualizado").Value!;
+        await _matriculaRepo.Atualizar(entidadeEditada);
+        var aposEdicao = await _matriculaRepo.ObterPorId(inserida.Id);
+
+        Assert.NotNull(aposEdicao);
+        var laudoPersistido = Assert.Single(aposEdicao.LaudosMedicos);
+        Assert.Equal("parecer-atualizado.pdf", laudoPersistido.NomeArquivo);
+        Assert.Equal(new byte[] { 31, 32, 33 }, laudoPersistido.Conteudo.Conteudo);
+    }
+
+    [Fact]
     public async Task Matricula_RestricoesMedicas_PersisteEObtemCorretamente()
     {
         var aluno = await AlunoInfrastructureTests.CriarEInserirAlunoAsync(_alunoRepo, _logradouroRepo);

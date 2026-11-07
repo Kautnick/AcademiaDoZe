@@ -1,5 +1,4 @@
 using AcademiaDoZe.Application.DTOs;
-using AcademiaDoZe.Application.Enums;
 using AcademiaDoZe.Application.Interfaces;
 using AcademiaDoZe.Application.Mappings;
 using AcademiaDoZe.Domain.Entities;
@@ -49,6 +48,11 @@ public class MatriculaService : IMatriculaService
     {
         var aluno = await _alunoRepository.ObterPorId(dto.AlunoId, cancellationToken);
         if (aluno == null) throw new DomainException("ALUNO_NAO_ENCONTRADO");
+
+        var matriculaAtiva = await _matRepository.ObterMatriculaAtivaPorAluno(dto.AlunoId, cancellationToken);
+        if (matriculaAtiva is not null && matriculaAtiva.Id != dto.Id)
+            throw new DomainException("ALUNO_JA_POSSUI_MATRICULA_ATIVA");
+
         var entityResult = dto.ToEntity(aluno);
         if (entityResult.IsFailure) throw new DomainException(string.Join(";", entityResult.Notifications.Select(n => n.Mensagem)));
         var updated = await _matRepository.Atualizar(entityResult.Value!, cancellationToken);
@@ -89,17 +93,10 @@ public class MatriculaService : IMatriculaService
         return list.Select(m => m.ToDto());
     }
 
-    public async Task<IEnumerable<MatriculaDto>> ObterPorPlanoAsync(AppMatriculaPlano plano, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MatriculaDto>> ObterPorPlanoAsync(Domain.Enums.MatriculaPlano plano, CancellationToken cancellationToken = default)
     {
-        var domainPlano = plano switch
-        {
-            AppMatriculaPlano.Mensal => Domain.Enums.MatriculaPlano.Mensal,
-            AppMatriculaPlano.Trimestral => Domain.Enums.MatriculaPlano.Trimestral,
-            AppMatriculaPlano.Semestral => Domain.Enums.MatriculaPlano.Semestral,
-            AppMatriculaPlano.Anual => Domain.Enums.MatriculaPlano.Anual,
-            _ => Domain.Enums.MatriculaPlano.Mensal
-        };
-        var list = await _matRepository.ObterPorPlano(domainPlano, cancellationToken);
+        if (!Enum.IsDefined(plano)) throw new ArgumentOutOfRangeException(nameof(plano), "Plano de matrícula inválido.");
+        var list = await _matRepository.ObterPorPlano(plano, cancellationToken);
         return list.Select(m => m.ToDto());
     }
 }

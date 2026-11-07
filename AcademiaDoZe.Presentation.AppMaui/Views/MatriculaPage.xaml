@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Converters"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.MatriculaPage"
+             Title="Matrícula">
+  <ContentPage.Resources>
+    <ResourceDictionary>
+      <converters:EnumDisplayConverter x:Key="EnumDisplayConverter" />
+    </ResourceDictionary>
+  </ContentPage.Resources>
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="14">
+      <Label Text="{Binding Titulo}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+
+      <Border Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="10">
+          <Label Text="Aluno da matrícula" FontSize="18" FontAttributes="Bold" />
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Entry Placeholder="CPF do aluno" Text="{Binding Cpf}" Keyboard="Numeric" />
+            <Button Grid.Column="1" Text="Pesquisar" Command="{Binding BuscarAlunoCommand}" />
+          </Grid>
+          <Border IsVisible="{Binding TemAlunoSelecionado}" Padding="12" BackgroundColor="{DynamicResource CardElevated}" Stroke="{DynamicResource Accent}" StrokeShape="RoundRectangle 14">
+            <Grid ColumnDefinitions="76,*" ColumnSpacing="12">
+              <Border WidthRequest="72" HeightRequest="72" Padding="2" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource Accent}" StrokeThickness="2" StrokeShape="Ellipse">
+                <Image Source="{Binding FotoSource}" Aspect="AspectFill" />
+              </Border>
+              <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                <Label Text="{Binding NomeAluno}" FontAttributes="Bold" FontSize="16" />
+                <Label Text="{Binding CpfAluno, StringFormat='CPF: {0}'}" />
+                <Label Text="{Binding DataNascimentoAluno, StringFormat='Nascimento: {0}'}" TextColor="{DynamicResource TextSecondary}" />
+              </VerticalStackLayout>
+            </Grid>
+          </Border>
+        </VerticalStackLayout>
+      </Border>
+
+      <Border Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="10">
+          <Label Text="Plano e vigência" FontSize="18" FontAttributes="Bold" />
+          <Picker Title="Selecione o plano" ItemsSource="{Binding Planos}" ItemDisplayBinding="{Binding ., Converter={StaticResource EnumDisplayConverter}}" SelectedItem="{Binding PlanoSelecionado}" />
+          <DatePicker Date="{Binding DataInicio}" />
+          <Border Padding="12" BackgroundColor="{DynamicResource CardElevated}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 12">
+            <Label Text="{Binding DataFimCalculada, StringFormat='Data final calculada: {0}'}" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+          </Border>
+          <Entry Placeholder="Objetivo da matrícula" Text="{Binding Objetivo}" MaxLength="500" />
+        </VerticalStackLayout>
+      </Border>
+
+      <Border IsVisible="{Binding TemAlunoSelecionado}" Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource Accent}" StrokeThickness="1.5" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="7">
+          <Label Text="Prévia da matrícula antes de salvar" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+          <Label Text="{Binding NomeAluno, StringFormat='Aluno: {0}'}" FontAttributes="Bold" />
+          <Label Text="{Binding CpfAluno, StringFormat='CPF: {0}'}" />
+          <Label Text="{Binding PlanoDisplayName, StringFormat='Plano: {0}'}" />
+          <Label Text="{Binding DataInicioFormatada, StringFormat='Início: {0}'}" />
+          <Label Text="{Binding DataFimCalculada, StringFormat='Término calculado: {0}'}" />
+          <Label Text="{Binding ObjetivoPreview, StringFormat='Objetivo: {0}'}" />
+          <Label Text="{Binding ResumoRestricoes, StringFormat='Restrições: {0}'}" />
+          <Label Text="{Binding ObservacoesPreview, StringFormat='Observações: {0}'}" />
+          <Label Text="{Binding ResumoLaudos, StringFormat='Laudos: {0}'}" />
+        </VerticalStackLayout>
+      </Border>
+
+      <Border Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="8">
+          <Label Text="Condições de saúde" FontSize="18" FontAttributes="Bold" />
+          <Label Text="Selecione todas as condições aplicáveis." TextColor="{DynamicResource TextSecondary}" />
+          <VerticalStackLayout BindableLayout.ItemsSource="{Binding Restricoes}" Spacing="2">
+            <BindableLayout.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                  <CheckBox IsChecked="{Binding Selecionada, Mode=TwoWay}" Color="{DynamicResource Accent}" />
+                  <Label Grid.Column="1" Text="{Binding Nome}" VerticalTextAlignment="Center" />
+                </Grid>
+              </DataTemplate>
+            </BindableLayout.ItemTemplate>
+          </VerticalStackLayout>
+          <Editor Placeholder="Observações e recomendações médicas" Text="{Binding ObservacoesRestricoes}" AutoSize="TextChanges" MaxLength="500" />
+        </VerticalStackLayout>
+      </Border>
+
+      <Border Padding="16" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+        <VerticalStackLayout Spacing="10">
+          <Label Text="Laudos médicos" FontSize="18" FontAttributes="Bold" />
+          <Label Text="{Binding SituacaoLaudo}" TextColor="{DynamicResource Accent}" FontAttributes="Bold" />
+          <VerticalStackLayout BindableLayout.ItemsSource="{Binding Laudos}" Spacing="6">
+            <BindableLayout.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                  <Label Text="{Binding NomeArquivo}" TextColor="{DynamicResource TextSecondary}" VerticalTextAlignment="Center" />
+                  <Button Grid.Column="1" Text="Remover" Padding="10,6" MinimumHeightRequest="38"
+                          Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoverLaudoItemCommand}"
+                          CommandParameter="{Binding .}" Style="{StaticResource DangerButtonStyle}" />
+                </Grid>
+              </DataTemplate>
+            </BindableLayout.ItemTemplate>
+          </VerticalStackLayout>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <Button Text="Selecionar vários documentos" Command="{Binding SelecionarLaudoCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+            <Button Grid.Column="1" Text="Usar câmera" Command="{Binding CapturarLaudoCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+          </Grid>
+          <Button Text="Remover todos os laudos" Command="{Binding RemoverLaudoCommand}" IsVisible="{Binding TemLaudo}" Style="{StaticResource DangerButtonStyle}" />
+        </VerticalStackLayout>
+      </Border>
+
+      <Border IsVisible="{Binding TemErro}" BackgroundColor="{DynamicResource ErrorBackground}" Stroke="{DynamicResource ErrorBorder}" StrokeShape="RoundRectangle 12" Padding="14">
+        <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+      </Border>
+      <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{DynamicResource Accent}" />
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <Button Text="Salvar matrícula" Command="{Binding SaveCommand}" IsEnabled="{Binding PodeSalvar}" />
+        <Button Grid.Column="1" Text="Cancelar" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+      </Grid>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>

@@ -1,5 +1,5 @@
 using AcademiaDoZe.Application.DTOs;
-using AcademiaDoZe.Application.Enums;
+using AcademiaDoZe.Domain.Enums;
 
 namespace AcademiaDoZe.Application.Interfaces;
 
@@ -15,5 +15,5 @@ public interface IMatriculaService
     Task<bool> PossuiMatriculaAtivaAsync(int alunoId, CancellationToken cancellationToken = default);
     Task<IEnumerable<MatriculaDto>> ObterAtivasAsync(CancellationToken cancellationToken = default);
     Task<IEnumerable<MatriculaDto>> ObterVencendoEmDiasAsync(int dias, CancellationToken cancellationToken = default);
-    Task<IEnumerable<MatriculaDto>> ObterPorPlanoAsync(AppMatriculaPlano plano, CancellationToken cancellationToken = default);
+    Task<IEnumerable<MatriculaDto>> ObterPorPlanoAsync(MatriculaPlano plano, CancellationToken cancellationToken = default);
 }

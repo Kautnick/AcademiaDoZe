@@ -1,14 +1,15 @@
-using System; // Matheus Kautnick Domeneghini
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel.DataAnnotations;
 
-namespace AcademiaDoZe.Domain.Enums
+namespace AcademiaDoZe.Domain.Enums;
+
+public enum MatriculaPlano
 {
-    public enum MatriculaPlano
-    {
-        Mensal = 1,
-        Trimestral = 2,
-        Semestral = 3,
-        Anual = 4
-    }
+    [Display(Name = "Mensal")]
+    Mensal = 1,
+    [Display(Name = "Trimestral")]
+    Trimestral = 2,
+    [Display(Name = "Semestral")]
+    Semestral = 3,
+    [Display(Name = "Anual")]
+    Anual = 4
 }

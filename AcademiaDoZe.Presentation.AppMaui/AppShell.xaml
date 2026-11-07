@@ -13,8 +13,9 @@
   <TabBar>
     <ShellContent Route="Dashboard" Title="Dashboard" ContentTemplate="{DataTemplate views:DashboardPage}" />
     <ShellContent Route="Logradouros" Title="Logradouros" ContentTemplate="{DataTemplate views:LogradouroListPage}" />
-     <ShellContent Route="Alunos" Title="Alunos" ContentTemplate="{DataTemplate views:AlunoListPage}" />
-     <ShellContent Route="Colaboradores" Title="Colaboradores" ContentTemplate="{DataTemplate views:ColaboradorListPage}" />
+    <ShellContent Route="Alunos" Title="Alunos" ContentTemplate="{DataTemplate views:AlunoListPage}" />
+    <ShellContent Route="Matriculas" Title="Matrículas" ContentTemplate="{DataTemplate views:MatriculaListPage}" />
+    <ShellContent Route="Colaboradores" Title="Colaboradores" ContentTemplate="{DataTemplate views:ColaboradorListPage}" />
   </TabBar>
 
 </Shell>

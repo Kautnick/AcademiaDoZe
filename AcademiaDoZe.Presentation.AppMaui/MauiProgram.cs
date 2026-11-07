@@ -45,6 +45,8 @@ public static class MauiProgram
         builder.Services.AddTransient<AlunoViewModel>();
         builder.Services.AddTransient<ColaboradorListViewModel>();
         builder.Services.AddTransient<ColaboradorViewModel>();
+        builder.Services.AddTransient<MatriculaListViewModel>();
+        builder.Services.AddTransient<MatriculaViewModel>();
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<LogradouroListPage>();
         builder.Services.AddTransient<LogradouroPage>();
@@ -52,6 +54,8 @@ public static class MauiProgram
         builder.Services.AddTransient<AlunoPage>();
         builder.Services.AddTransient<ColaboradorListPage>();
         builder.Services.AddTransient<ColaboradorPage>();
+        builder.Services.AddTransient<MatriculaListPage>();
+        builder.Services.AddTransient<MatriculaPage>();
 
         return builder.Build();
     }

@@ -96,10 +96,11 @@ public class MatriculaTests
         Assert.Equal(expectSuccess, result.IsSuccess);
     }
 
-    [Theory(DisplayName = "Matricula: menor de 16 anos exige laudo -> MENOR_16_LAUDO_OBRIGATORIO")]
-    [InlineData(15, true)]
-    [InlineData(20, false)]
-    public void Deve_Falhar_Criacao_Quando_Menor16_ExigeLaudo(int age, bool expectFailure)
+    [Theory(DisplayName = "Matrícula: alunos de 12 a 16 anos exigem laudo médico")]
+    [InlineData(12, true)]
+    [InlineData(16, true)]
+    [InlineData(17, false)]
+    public void Deve_Exigir_Laudo_Para_Idades_De_12_A_16(int age, bool expectFailure)
     {
         var aluno = GetValidAluno(DateOnly.FromDateTime(DateTime.Today.AddYears(-age)));
         var result = Matricula.Criar(
@@ -113,10 +114,7 @@ public class MatriculaTests
         );
         Assert.Equal(expectFailure, result.IsFailure);
         if (expectFailure)
-        {
-            Assert.NotEmpty(result.Notifications);
-            Assert.Contains(result.Notifications, n => n.Mensagem == "MENOR_16_LAUDO_OBRIGATORIO");
-        }
+            Assert.Contains(result.Notifications, n => n.Mensagem == "LAUDO_12_A_16_OBRIGATORIO");
     }
 
     [Theory(DisplayName = "Matricula: criação e cálculo de DataFim para planos comuns")]
@@ -139,7 +137,7 @@ public class MatriculaTests
         Assert.Equal(inicio.AddMonths(meses), result.Value!.DataFim);
     }
 
-    [Theory(DisplayName = "Matricula: restrições sem laudo -> RESTRICOES_LAUDO_OBRIGATORIO quando aplicável")]
+    [Theory(DisplayName = "Matricula: múltiplas restrições são aceitas como flags e exigem laudo")]
     [InlineData(true)]
     [InlineData(false)]
     public void Deve_Falhar_Criacao_Quando_RestricoesSemLaudo(bool provideLaudo)
@@ -187,5 +185,24 @@ public class MatriculaTests
         );
         Assert.True(result.IsSuccess);
         Assert.Equal(expected, result.Value!.ObservacoesRestricoes);
+    }
+
+    [Fact]
+    public void Deve_Aceitar_VariosLaudos_EmUmaMatricula()
+    {
+        var aluno = GetValidAluno();
+        var laudos = new[]
+        {
+            LaudoMatricula.Criar("parecer.pdf", new byte[] { 1, 2 }).Value!,
+            LaudoMatricula.Criar("exame.png", new byte[] { 3, 4 }).Value!
+        };
+
+        var resultado = Matricula.CriarComLaudos(
+            1, aluno, MatriculaPlano.Mensal, DateOnly.FromDateTime(DateTime.Today),
+            "Condicionamento", MatriculaRestricoes.None, laudos);
+
+        Assert.True(resultado.IsSuccess);
+        Assert.Equal(2, resultado.Value!.LaudosMedicos.Count);
+        Assert.Equal(new[] { "parecer.pdf", "exame.png" }, resultado.Value.LaudosMedicos.Select(laudo => laudo.NomeArquivo));
     }
 }

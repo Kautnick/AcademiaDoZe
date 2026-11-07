@@ -1,15 +1,14 @@
 # AcademiaDoZe
 
-Projeto acadêmico de desenvolvimento em C# com persistência em SQL Server.
+Projeto acadêmico em C#/.NET MAUI com arquitetura Domain, Application, Infrastructure e persistência exclusiva em Microsoft SQL Server.
 
-## SGBD da entrega
+## Banco de dados local
 
-Esta versão está preparada para **SQL Server executado em Docker**, conforme a orientação atual da atividade.
+A aplicação acessa diretamente a instância local do SQL Server; Docker e outros SGBDs não são necessários. A connection string padrão está em `AcademiaDoZe.Presentation.AppMaui/MauiProgram.cs` e pode ser sobrescrita por `ACADEMIA_DO_ZE_CONNECTION`. Ajuste a instância e o catálogo para o SQL Server instalado neste computador, mantendo `Initial Catalog=db_academia_do_ze`.
 
 ## Executar
 
 ```bash
-docker compose up -d
 dotnet restore
 dotnet build
 dotnet test
@@ -35,11 +34,9 @@ Os formulários usam os logradouros já cadastrados; cadastre primeiro o endere�
 
 ## Atividade de Matrícula
 
-A implementação de `MatriculaRepository` e `MatriculaInfrastructureTests` contempla todos os métodos definidos em `IMatriculaRepository`. Os testes utilizam SQL parametrizado, `await using`, mapeamento via `DbDataReader` e funções específicas do SQL Server.
+A aba Matrículas oferece cadastro, consulta, edição e exclusão com confirmação. A listagem permite filtrar por ID da matrícula, ID do aluno, CPF (parcial, com ou sem pontuação), vigência e vencimento. Antes de salvar, o formulário mostra uma prévia atualizada com aluno, plano, período, objetivo, restrições e laudos. Também permite selecionar vários laudos/documentos (PDF ou imagem) em uma seleção, adicionar mais, remover individualmente ou limpar todos. Os arquivos são persistidos em `dbo.tb_matricula_laudo` e carregados na edição; documentos legados são migrados sem exclusão.
 
-Nos dados de teste:
-- `objetivo` = `Matheus Kautnick Domeneghini`
-- `obs_restricao` contém `SQLServer`
+O plano calcula automaticamente a data final; restrições médicas são flags independentes e podem ser combinadas. Alunos com idade entre 12 e 16 anos na data de início e alunos com restrições exigem pelo menos um laudo.
 
 ## Verificação no banco
 

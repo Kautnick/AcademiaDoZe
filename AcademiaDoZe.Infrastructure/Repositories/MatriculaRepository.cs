@@ -67,7 +67,9 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
             await using var command = await CreateCommandAsync(query, cancellationToken);
             command.AddParameter("@Id", id, DbType.Int32);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            return await reader.ReadAsync(cancellationToken) ? Map(reader) : null;
+            var matricula = await reader.ReadAsync(cancellationToken) ? Map(reader) : null;
+            await reader.DisposeAsync();
+            return matricula is null ? null : await CarregarLaudosAsync(matricula, cancellationToken);
         }
         catch (DbException ex)
         {
@@ -84,7 +86,8 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             var matriculas = new List<Matricula>();
             while (await reader.ReadAsync(cancellationToken)) matriculas.Add(Map(reader));
-            return matriculas;
+            await reader.DisposeAsync();
+            return await CarregarLaudosAsync(matriculas, cancellationToken);
         }
         catch (DbException ex)
         {
@@ -96,19 +99,26 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
     {
         try
         {
-            string query = FormatInsertQuery("INSERT INTO tb_matricula (aluno_id, plano, data_inicio, data_fim, objetivo, restricao_medica, obs_restricao, laudo_medico) VALUES (@AlunoId, @Plano, @DataInicio, @DataFim, @Objetivo, @RestricaoMedica, @ObsRestricao, @LaudoMedico)");
-            await using var command = await CreateCommandAsync(query, cancellationToken);
-            command.AddParameter("@AlunoId", entity.AlunoId, DbType.Int32);
-            command.AddParameter("@Plano", (int)entity.Plano, DbType.Int32);
-            command.AddParameter("@DataInicio", entity.DataInicio, DbType.Date);
-            command.AddParameter("@DataFim", entity.DataFim, DbType.Date);
-            command.AddParameter("@Objetivo", entity.Objetivo, DbType.String);
-            command.AddParameter("@RestricaoMedica", (int)entity.RestricoesMedicas, DbType.Int32);
-            command.AddParameter("@ObsRestricao", (object?)entity.ObservacoesRestricoes ?? DBNull.Value, DbType.String);
-            command.AddParameter("@LaudoMedico", (object?)entity.LaudoMedico?.Conteudo ?? DBNull.Value, DbType.Binary);
-            int id = await command.ExecuteScalarIdAsync("ERRO_ADICIONAR_MATRICULA", "Falha ao obter ID inserido para a matrícula.", cancellationToken);
-            typeof(EntidadeBase).GetProperty(nameof(EntidadeBase.Id))?.SetValue(entity, id);
-            return entity;
+            var connection = await GetOpenConnectionAsync(cancellationToken);
+            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                const string insertSql = "INSERT INTO tb_matricula (aluno_id, plano, data_inicio, data_fim, objetivo, restricao_medica, obs_restricao, laudo_medico) VALUES (@AlunoId, @Plano, @DataInicio, @DataFim, @Objetivo, @RestricaoMedica, @ObsRestricao, @LaudoMedico)";
+                await using var command = DbProvider.CreateCommand(FormatInsertQuery(insertSql), connection);
+                command.Transaction = transaction;
+                AdicionarParametros(command, entity);
+                command.AddParameter("@LaudoMedico", (object?)entity.LaudoMedico?.Conteudo ?? DBNull.Value, DbType.Binary);
+                int id = await command.ExecuteScalarIdAsync("ERRO_ADICIONAR_MATRICULA", "Falha ao obter ID inserido para a matrícula.", cancellationToken);
+                typeof(EntidadeBase).GetProperty(nameof(EntidadeBase.Id))?.SetValue(entity, id);
+                await InserirLaudosAsync(connection, transaction, entity, cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return entity;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
         catch (DbException ex)
         {
@@ -120,20 +130,34 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
     {
         try
         {
-            const string query = "UPDATE tb_matricula SET aluno_id = @AlunoId, plano = @Plano, data_inicio = @DataInicio, data_fim = @DataFim, objetivo = @Objetivo, restricao_medica = @RestricaoMedica, obs_restricao = @ObsRestricao, laudo_medico = @LaudoMedico WHERE id_matricula = @Id";
-            await using var command = await CreateCommandAsync(query, cancellationToken);
-            command.AddParameter("@Id", entity.Id, DbType.Int32);
-            command.AddParameter("@AlunoId", entity.AlunoId, DbType.Int32);
-            command.AddParameter("@Plano", (int)entity.Plano, DbType.Int32);
-            command.AddParameter("@DataInicio", entity.DataInicio, DbType.Date);
-            command.AddParameter("@DataFim", entity.DataFim, DbType.Date);
-            command.AddParameter("@Objetivo", entity.Objetivo, DbType.String);
-            command.AddParameter("@RestricaoMedica", (int)entity.RestricoesMedicas, DbType.Int32);
-            command.AddParameter("@ObsRestricao", (object?)entity.ObservacoesRestricoes ?? DBNull.Value, DbType.String);
-            command.AddParameter("@LaudoMedico", (object?)entity.LaudoMedico?.Conteudo ?? DBNull.Value, DbType.Binary);
-            int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
-            if (rowsAffected == 0) throw new InfrastructureException("REGISTRO_NAO_ENCONTRADO", $"Nenhuma matrícula encontrada com o ID {entity.Id} para atualização.");
-            return entity;
+            var connection = await GetOpenConnectionAsync(cancellationToken);
+            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                const string query = "UPDATE tb_matricula SET aluno_id = @AlunoId, plano = @Plano, data_inicio = @DataInicio, data_fim = @DataFim, objetivo = @Objetivo, restricao_medica = @RestricaoMedica, obs_restricao = @ObsRestricao, laudo_medico = @LaudoMedico WHERE id_matricula = @Id";
+                await using var command = DbProvider.CreateCommand(query, connection);
+                command.Transaction = transaction;
+                command.AddParameter("@Id", entity.Id, DbType.Int32);
+                AdicionarParametros(command, entity);
+                command.AddParameter("@LaudoMedico", (object?)entity.LaudoMedico?.Conteudo ?? DBNull.Value, DbType.Binary);
+                int rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
+                if (rowsAffected == 0) throw new InfrastructureException("REGISTRO_NAO_ENCONTRADO", $"Nenhuma matrícula encontrada com o ID {entity.Id} para atualização.");
+
+                await using (var excluirLaudos = DbProvider.CreateCommand("DELETE FROM dbo.tb_matricula_laudo WHERE matricula_id = @Id", connection))
+                {
+                    excluirLaudos.Transaction = transaction;
+                    excluirLaudos.AddParameter("@Id", entity.Id, DbType.Int32);
+                    await excluirLaudos.ExecuteNonQueryAsync(cancellationToken);
+                }
+                await InserirLaudosAsync(connection, transaction, entity, cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return entity;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
         catch (InfrastructureException) { throw; }
         catch (DbException ex)
@@ -166,7 +190,8 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             var result = new List<Matricula>();
             while (await reader.ReadAsync(cancellationToken)) result.Add(Map(reader));
-            return result;
+            await reader.DisposeAsync();
+            return await CarregarLaudosAsync(result, cancellationToken);
         }
         catch (DbException ex)
         {
@@ -178,11 +203,13 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
     {
         try
         {
-            string query = $"{BaseSelectQuery} WHERE m.aluno_id = @AlunoId AND m.data_fim >= {GetCurrentDateFunction()} ORDER BY m.data_fim DESC";
+            string query = $"{BaseSelectQuery} WHERE m.aluno_id = @AlunoId AND m.data_inicio <= {GetCurrentDateFunction()} AND m.data_fim >= {GetCurrentDateFunction()} ORDER BY m.data_fim DESC";
             await using var command = await CreateCommandAsync(query, cancellationToken);
             command.AddParameter("@AlunoId", alunoId, DbType.Int32);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            return await reader.ReadAsync(cancellationToken) ? Map(reader) : null;
+            var matricula = await reader.ReadAsync(cancellationToken) ? Map(reader) : null;
+            await reader.DisposeAsync();
+            return matricula is null ? null : await CarregarLaudosAsync(matricula, cancellationToken);
         }
         catch (DbException ex)
         {
@@ -198,13 +225,14 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
         try
         {
             string filtroAluno = alunoId > 0 ? " AND m.aluno_id = @AlunoId" : string.Empty;
-            string query = $"{BaseSelectQuery} WHERE m.data_fim >= {GetCurrentDateFunction()}{filtroAluno} ORDER BY m.data_fim ASC";
+            string query = $"{BaseSelectQuery} WHERE m.data_inicio <= {GetCurrentDateFunction()} AND m.data_fim >= {GetCurrentDateFunction()}{filtroAluno} ORDER BY m.data_fim ASC";
             await using var command = await CreateCommandAsync(query, cancellationToken);
             if (alunoId > 0) command.AddParameter("@AlunoId", alunoId, DbType.Int32);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             var result = new List<Matricula>();
             while (await reader.ReadAsync(cancellationToken)) result.Add(Map(reader));
-            return result;
+            await reader.DisposeAsync();
+            return await CarregarLaudosAsync(result, cancellationToken);
         }
         catch (DbException ex)
         {
@@ -219,18 +247,71 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
         {
             string hoje = GetCurrentDateFunction();
             string limite = GetDateAddDaysExpression(hoje, "@Dias");
-            string query = $"{BaseSelectQuery} WHERE m.data_fim >= {hoje} AND m.data_fim <= {limite} ORDER BY m.data_fim ASC";
+            string query = $"{BaseSelectQuery} WHERE m.data_inicio <= {hoje} AND m.data_fim >= {hoje} AND m.data_fim <= {limite} ORDER BY m.data_fim ASC";
             await using var command = await CreateCommandAsync(query, cancellationToken);
             command.AddParameter("@Dias", dias, DbType.Int32);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             var result = new List<Matricula>();
             while (await reader.ReadAsync(cancellationToken)) result.Add(Map(reader));
-            return result;
+            await reader.DisposeAsync();
+            return await CarregarLaudosAsync(result, cancellationToken);
         }
         catch (DbException ex)
         {
             throw new InfrastructureException("ERRO_OBTER_MATRICULAS_VENCENDO", $"Erro ao obter matrículas vencendo em {dias} dias: {ex.Message}", ex);
         }
+    }
+
+    private static void AdicionarParametros(DbCommand command, Matricula entity)
+    {
+        command.AddParameter("@AlunoId", entity.AlunoId, DbType.Int32);
+        command.AddParameter("@Plano", (int)entity.Plano, DbType.Int32);
+        command.AddParameter("@DataInicio", entity.DataInicio, DbType.Date);
+        command.AddParameter("@DataFim", entity.DataFim, DbType.Date);
+        command.AddParameter("@Objetivo", entity.Objetivo, DbType.String);
+        command.AddParameter("@RestricaoMedica", (int)entity.RestricoesMedicas, DbType.Int32);
+        command.AddParameter("@ObsRestricao", (object?)entity.ObservacoesRestricoes ?? DBNull.Value, DbType.String);
+    }
+
+    private static async Task InserirLaudosAsync(DbConnection connection, DbTransaction transaction, Matricula entity, CancellationToken cancellationToken)
+    {
+        foreach (var laudo in entity.LaudosMedicos)
+        {
+            await using var command = DbProvider.CreateCommand(
+                "INSERT INTO dbo.tb_matricula_laudo (matricula_id, nome_arquivo, conteudo) VALUES (@MatriculaId, @NomeArquivo, @Conteudo)", connection);
+            command.Transaction = transaction;
+            command.AddParameter("@MatriculaId", entity.Id, DbType.Int32);
+            command.AddParameter("@NomeArquivo", laudo.NomeArquivo, DbType.String);
+            command.AddParameter("@Conteudo", laudo.Conteudo.Conteudo, DbType.Binary);
+            await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+    }
+
+    private async Task<Matricula> CarregarLaudosAsync(Matricula matricula, CancellationToken cancellationToken)
+    {
+        await using var command = await CreateCommandAsync(
+            "SELECT nome_arquivo, conteudo FROM dbo.tb_matricula_laudo WHERE matricula_id = @MatriculaId ORDER BY id_laudo", cancellationToken);
+        command.AddParameter("@MatriculaId", matricula.Id, DbType.Int32);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var laudos = new List<LaudoMatricula>();
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var nome = reader.GetStringValue("nome_arquivo");
+            var conteudo = reader.GetNullableBytes("conteudo") ?? [];
+            var laudo = LaudoMatricula.Criar(nome, conteudo);
+            if (laudo.IsFailure)
+                throw new InfrastructureException("ERRO_MAPEAMENTO_LAUDO", $"Laudo inválido na matrícula {matricula.Id}: {string.Join(", ", laudo.Notifications.Select(n => n.Mensagem))}");
+            laudos.Add(laudo.Value!);
+        }
+        return laudos.Count == 0 ? matricula : matricula.ComLaudosMedicos(laudos);
+    }
+
+    private async Task<IEnumerable<Matricula>> CarregarLaudosAsync(IEnumerable<Matricula> matriculas, CancellationToken cancellationToken)
+    {
+        var resultado = new List<Matricula>();
+        foreach (var matricula in matriculas)
+            resultado.Add(await CarregarLaudosAsync(matricula, cancellationToken));
+        return resultado;
     }
 
     public async Task<IEnumerable<Matricula>> ObterPorPlano(MatriculaPlano plano, CancellationToken cancellationToken = default)
@@ -243,7 +324,8 @@ INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             var result = new List<Matricula>();
             while (await reader.ReadAsync(cancellationToken)) result.Add(Map(reader));
-            return result;
+            await reader.DisposeAsync();
+            return await CarregarLaudosAsync(result, cancellationToken);
         }
         catch (DbException ex)
         {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Converters"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.MatriculaListPage"
+             Title="Matrículas">
+  <ContentPage.Resources>
+    <ResourceDictionary>
+      <converters:EnumDisplayConverter x:Key="EnumDisplayConverter" />
+    </ResourceDictionary>
+  </ContentPage.Resources>
+  <Grid Padding="16" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+    <Border Grid.Row="0" Padding="14" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+      <VerticalStackLayout Spacing="8">
+        <Label Text="Filtros de matrícula" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource Accent}" />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+          <Entry Placeholder="ID da matrícula" Text="{Binding IdMatricula}" Keyboard="Numeric" />
+          <Entry Grid.Column="1" Placeholder="ID do aluno" Text="{Binding IdAluno}" Keyboard="Numeric" />
+        </Grid>
+        <Entry Placeholder="Filtrar por CPF (com ou sem pontuação)" Text="{Binding Cpf}" Keyboard="Numeric" />
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
+          <Switch IsToggled="{Binding ApenasAtivas}" />
+          <Label Grid.Column="1" Text="Somente matrículas ativas" VerticalTextAlignment="Center" />
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <Entry Placeholder="Vencendo nos próximos dias" Text="{Binding DiasParaVencer}" Keyboard="Numeric" />
+          <Button Grid.Column="1" Text="Pesquisar" Command="{Binding SearchCommand}" />
+        </Grid>
+      </VerticalStackLayout>
+    </Border>
+    <Border Grid.Row="1" IsVisible="{Binding TemErro}" BackgroundColor="{DynamicResource ErrorBackground}" Stroke="{DynamicResource ErrorBorder}" StrokeShape="RoundRectangle 12" Padding="12">
+      <Label Text="{Binding MensagemErro}" TextColor="{DynamicResource ErrorForeground}" />
+    </Border>
+    <Grid Grid.Row="2">
+      <CollectionView ItemsSource="{Binding Items}">
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <Border Margin="0,0,0,10" Padding="14" BackgroundColor="{DynamicResource CardBackground}" Stroke="{DynamicResource CardStroke}" StrokeShape="RoundRectangle 16">
+              <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="72,*" ColumnSpacing="12">
+                  <Border WidthRequest="68" HeightRequest="68" Padding="2" BackgroundColor="{DynamicResource CardElevated}" Stroke="{DynamicResource Accent}" StrokeThickness="2" StrokeShape="Ellipse">
+                    <Image Source="{Binding FotoSource}" Aspect="AspectFill" IsVisible="{Binding TemFoto}" />
+                  </Border>
+                  <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="3">
+                    <Label Text="{Binding NomeAluno}" FontSize="17" FontAttributes="Bold" />
+                    <Label Text="{Binding Cpf}" TextColor="{DynamicResource Accent}" />
+                    <Label Text="{Binding AlunoId, StringFormat='ID do aluno: {0}'}" TextColor="{DynamicResource TextSecondary}" FontSize="12" />
+                  </VerticalStackLayout>
+                </Grid>
+                <Label Text="{Binding MatriculaId, StringFormat='Matrícula #{0}'}" FontAttributes="Bold" />
+                <Label Text="{Binding Plano, Converter={StaticResource EnumDisplayConverter}, StringFormat='Plano: {0}'}" TextColor="{DynamicResource Accent}" />
+                <Label Text="{Binding DataInicio, StringFormat='Início: {0:dd/MM/yyyy}'}" />
+                <Label Text="{Binding DataFim, StringFormat='Término: {0:dd/MM/yyyy}'}" />
+                <Label Text="{Binding Objetivo, StringFormat='Objetivo: {0}'}" />
+                <Label Text="{Binding RestricoesMedicas, Converter={StaticResource EnumDisplayConverter}, StringFormat='Restrições: {0}'}" />
+                <Label Text="{Binding ObservacoesRestricoes, StringFormat='Observações: {0}'}" IsVisible="{Binding TemObservacoes}" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                  <Button Text="Editar" Clicked="OnEditClicked" Style="{StaticResource SecondaryButtonStyle}" />
+                  <Button Grid.Column="1" Text="Excluir" Clicked="OnDeleteClicked" Style="{StaticResource DangerButtonStyle}" />
+                </Grid>
+              </VerticalStackLayout>
+            </Border>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+      <Label Text="Nenhuma matrícula encontrada." IsVisible="{Binding HasNoItems}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" TextColor="{DynamicResource TextSecondary}" />
+    </Grid>
+    <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="10">
+      <Button Text="Nova matrícula" Command="{Binding AddCommand}" />
+      <Button Grid.Column="1" Text="Atualizar" Command="{Binding RefreshCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+    </Grid>
+  </Grid>
+</ContentPage>
