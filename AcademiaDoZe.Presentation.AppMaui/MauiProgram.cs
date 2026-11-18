@@ -33,6 +33,10 @@ public static class MauiProgram
             _ => new ColaboradorRepository(connectionString, DatabaseType.SqlServer));
         builder.Services.AddScoped<IMatriculaRepository>(
             _ => new MatriculaRepository(connectionString, DatabaseType.SqlServer));
+        builder.Services.AddScoped<IAcessoAlunoRepository>(
+            _ => new AcessoAlunoRepository(connectionString, DatabaseType.SqlServer));
+        builder.Services.AddScoped<IAcessoColaboradorRepository>(
+            _ => new AcessoColaboradorRepository(connectionString, DatabaseType.SqlServer));
 
         builder.Services.AddApplicationServices();
 
@@ -47,6 +51,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ColaboradorViewModel>();
         builder.Services.AddTransient<MatriculaListViewModel>();
         builder.Services.AddTransient<MatriculaViewModel>();
+        builder.Services.AddTransient<AcessoViewModel>();
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<LogradouroListPage>();
         builder.Services.AddTransient<LogradouroPage>();
@@ -56,6 +61,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ColaboradorPage>();
         builder.Services.AddTransient<MatriculaListPage>();
         builder.Services.AddTransient<MatriculaPage>();
+        builder.Services.AddTransient<AcessoPage>();
 
         return builder.Build();
     }

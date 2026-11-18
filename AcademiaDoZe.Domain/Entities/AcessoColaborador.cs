@@ -11,15 +11,21 @@ public class AcessoColaborador : EntidadeBase, IAggregateRoot
         DataHora = dataHora;
     }
     public static Result<AcessoColaborador> Criar(int id, Colaborador colaborador, DateTime dataHora)
+        => Criar(id, colaborador?.Id ?? 0, dataHora, colaborador is null);
+
+    public static Result<AcessoColaborador> Criar(int id, int colaboradorId, DateTime dataHora)
+        => Criar(id, colaboradorId, dataHora, colaboradorId <= 0);
+
+    private static Result<AcessoColaborador> Criar(int id, int colaboradorId, DateTime dataHora, bool colaboradorInvalido)
     {
         var notifications = new List<Notification>();
-        if (colaborador == null)
+        if (colaboradorInvalido)
             notifications.Add(new Notification("Colaborador", "COLABORADOR_INVALIDO"));
         if (dataHora.TimeOfDay < new TimeSpan(6, 0, 0) || dataHora.TimeOfDay > new TimeSpan(22, 0, 0))
             notifications.Add(new Notification("DataHora", "DATA_HORA_INTERVALO_INVALIDO"));
         if (notifications.Count != 0)
             return Result<AcessoColaborador>.Failure(notifications);
-        return Result<AcessoColaborador>.Success(new AcessoColaborador(id, colaborador!.Id, dataHora));
+        return Result<AcessoColaborador>.Success(new AcessoColaborador(id, colaboradorId, dataHora));
     }
 }
 // Dependem da persistência:

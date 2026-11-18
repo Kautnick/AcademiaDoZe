@@ -16,6 +16,7 @@
     <ShellContent Route="Alunos" Title="Alunos" ContentTemplate="{DataTemplate views:AlunoListPage}" />
     <ShellContent Route="Matriculas" Title="Matrículas" ContentTemplate="{DataTemplate views:MatriculaListPage}" />
     <ShellContent Route="Colaboradores" Title="Colaboradores" ContentTemplate="{DataTemplate views:ColaboradorListPage}" />
+    <ShellContent Route="Acessos" Title="Entrada/Saída" ContentTemplate="{DataTemplate views:AcessoPage}" />
   </TabBar>
 
 </Shell>

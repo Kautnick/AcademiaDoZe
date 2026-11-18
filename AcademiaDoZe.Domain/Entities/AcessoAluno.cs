@@ -11,15 +11,21 @@ public class AcessoAluno : EntidadeBase, IAggregateRoot
         DataHora = dataHora;
     }
     public static Result<AcessoAluno> Criar(int id, Aluno aluno, DateTime dataHora)
+        => Criar(id, aluno?.Id ?? 0, dataHora, aluno is null);
+
+    public static Result<AcessoAluno> Criar(int id, int alunoId, DateTime dataHora)
+        => Criar(id, alunoId, dataHora, alunoId <= 0);
+
+    private static Result<AcessoAluno> Criar(int id, int alunoId, DateTime dataHora, bool alunoInvalido)
     {
         var notifications = new List<Notification>();
-        if (aluno == null)
+        if (alunoInvalido)
             notifications.Add(new Notification("Aluno", "ALUNO_INVALIDO"));
         if (dataHora.TimeOfDay < new TimeSpan(6, 0, 0) || dataHora.TimeOfDay > new TimeSpan(22, 0, 0))
             notifications.Add(new Notification("DataHora", "DATA_HORA_INTERVALO_INVALIDO"));
         if (notifications.Count != 0)
             return Result<AcessoAluno>.Failure(notifications);
-        return Result<AcessoAluno>.Success(new AcessoAluno(id, aluno!.Id, dataHora));
+        return Result<AcessoAluno>.Success(new AcessoAluno(id, alunoId, dataHora));
     }
 }
 // Dependem da persistência:

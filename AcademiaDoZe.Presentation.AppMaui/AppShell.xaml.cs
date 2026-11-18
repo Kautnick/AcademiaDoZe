@@ -8,6 +8,7 @@ public partial class AppShell : Shell
     public const string AlunoFormRoute = "aluno-form";
     public const string ColaboradorFormRoute = "colaborador-form";
     public const string MatriculaFormRoute = "matricula-form";
+    public const string AcessoRoute = "acesso";
 
     public AppShell()
     {
@@ -16,5 +17,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(AlunoFormRoute, typeof(Views.AlunoPage));
         Routing.RegisterRoute(ColaboradorFormRoute, typeof(Views.ColaboradorPage));
         Routing.RegisterRoute(MatriculaFormRoute, typeof(Views.MatriculaPage));
+        Routing.RegisterRoute(AcessoRoute, typeof(Views.AcessoPage));
     }
 }

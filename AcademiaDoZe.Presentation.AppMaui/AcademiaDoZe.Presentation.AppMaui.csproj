@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Views\AcessoPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\AlunoListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -42,6 +45,9 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\MatriculaPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\AcessoPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>

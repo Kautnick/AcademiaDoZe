@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.AcessoPage"
+             Title="Entrada/Saída">
+  <ScrollView>
+    <VerticalStackLayout Padding="20" Spacing="14">
+      <Label Text="Registro de acesso" FontSize="24" FontAttributes="Bold" />
+
+      <Border BackgroundColor="{DynamicResource CardBackground}"
+              Stroke="{DynamicResource CardStroke}"
+              StrokeShape="RoundRectangle 16"
+              Padding="16">
+        <VerticalStackLayout Spacing="12">
+          <Label Text="Pessoa" TextColor="{DynamicResource TextSecondary}" />
+          <Picker Title="Selecione" SelectedItem="{Binding Tipo}">
+            <Picker.Items>
+              <x:String>Aluno</x:String>
+              <x:String>Colaborador</x:String>
+            </Picker.Items>
+          </Picker>
+
+          <Label Text="CPF" TextColor="{DynamicResource TextSecondary}" />
+          <Entry Text="{Binding Cpf}" Placeholder="Somente números" Keyboard="Numeric" />
+
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Text="Registrar entrada" Command="{Binding EntrarCommand}" />
+            <Button Grid.Column="1" Text="Registrar saída" Command="{Binding SairCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+          </Grid>
+        </VerticalStackLayout>
+      </Border>
+
+      <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{DynamicResource Accent}" />
+      <Border BackgroundColor="{DynamicResource CardBackground}"
+              Stroke="{DynamicResource CardStroke}"
+              StrokeShape="RoundRectangle 12"
+              Padding="14">
+        <Label Text="{Binding Mensagem}" FontSize="14" />
+      </Border>
+    </VerticalStackLayout>
+  </ScrollView>
+</ContentPage>
